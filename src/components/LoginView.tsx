@@ -7,10 +7,8 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  ShieldCheck,
-  UserCheck,
   AlertCircle,
-  KeyRound,
+  ShieldCheck,
 } from 'lucide-react'
 
 interface LoginViewProps {
@@ -38,13 +36,13 @@ export const LoginView: React.FC<LoginViewProps> = ({
     const cleanPin = pin.trim()
 
     if (!cleanUsername || !cleanPin) {
-      setErrorMsg('Mohon masukkan Username dan PIN!')
+      setErrorMsg('Mohon masukkan Username dan PIN / Password!')
       return
     }
 
     setIsLoading(true)
 
-    // Simulate snappy login check
+    // Snappy verification
     setTimeout(() => {
       const foundUser = users.find(
         (u) =>
@@ -59,16 +57,6 @@ export const LoginView: React.FC<LoginViewProps> = ({
         setIsLoading(false)
       }
     }, 200)
-  }
-
-  // Quick preset login helper
-  const handleQuickLogin = (role: 'admin' | 'kasir') => {
-    const target = users.find((u) => u.role === role)
-    if (target) {
-      setUsername(target.username)
-      setPin(target.pin)
-      setErrorMsg(null)
-    }
   }
 
   return (
@@ -94,9 +82,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
         {/* Form Body */}
         <div className="p-6 sm:p-8 space-y-5">
           <div className="text-center space-y-1">
-            <h2 className="text-lg font-bold text-slate-900 m-0">Masuk ke Kasir</h2>
+            <h2 className="text-lg font-bold text-slate-900 m-0">Masuk ke Sistem</h2>
             <p className="text-xs text-slate-500 m-0">
-              Silakan login untuk memulai transaksi atau kelola toko
+              Silakan login dengan akun yang telah terdaftar
             </p>
           </div>
 
@@ -112,7 +100,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
             {/* Username Field */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700 block">
-                Username Akun
+                Username
               </label>
               <div className="relative">
                 <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -120,7 +108,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   type="text"
                   required
                   autoFocus
-                  placeholder="admin / kasir..."
+                  placeholder="Ketik username Anda..."
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
@@ -140,7 +128,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 <input
                   type={showPin ? 'text' : 'password'}
                   required
-                  placeholder="Masukkan PIN (cth: 123456)"
+                  placeholder="Ketik PIN / password Anda..."
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
                   className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white tracking-widest transition-all"
@@ -161,57 +149,15 @@ export const LoginView: React.FC<LoginViewProps> = ({
               disabled={isLoading}
               className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all text-sm disabled:opacity-50"
             >
-              <span>{isLoading ? 'Memeriksa Akun...' : 'Masuk Sekarang'}</span>
+              <span>{isLoading ? 'Memeriksa Akun...' : 'Masuk ke Kasir'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          {/* Quick Demo Helper Chips */}
-          <div className="pt-2 border-t border-slate-100 space-y-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block text-center">
-              Pilihan Masuk Cepat (Akun Bawaan)
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin')}
-                className="p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100 active:scale-95 text-left transition-all group"
-              >
-                <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Akun Admin</span>
-                </div>
-                <div className="text-[10px] text-slate-500 mt-0.5">
-                  User: <b>admin</b> | PIN: <b>123456</b>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('kasir')}
-                className="p-2.5 rounded-xl border border-sky-200 bg-sky-50/70 hover:bg-sky-100 active:scale-95 text-left transition-all group"
-              >
-                <div className="flex items-center gap-1.5 text-sky-800 font-bold text-xs">
-                  <UserCheck className="w-3.5 h-3.5" />
-                  <span>Akun Kasir</span>
-                </div>
-                <div className="text-[10px] text-slate-500 mt-0.5">
-                  User: <b>kasir</b> | PIN: <b>123456</b>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Role explanation */}
-          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-[11px] text-slate-500 space-y-1">
-            <div className="flex items-center gap-1 text-slate-700 font-bold">
-              <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Hak Akses Akun:</span>
-            </div>
-            <ul className="list-disc pl-4 space-y-0.5 text-[10px]">
-              <li><b>Admin / Owner:</b> Akses penuh ke kasir, stok, laporan omset, dan pengaturan.</li>
-              <li><b>Kasir / Staf:</b> Dibatasi hanya bisa membuka layar transaksi kasir saja.</li>
-            </ul>
+          {/* Secure note */}
+          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-[11px] text-slate-500 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Hak akses menu akan otomatis disesuaikan dengan jenis akun Anda.</span>
           </div>
         </div>
       </div>
