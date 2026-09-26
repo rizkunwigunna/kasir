@@ -269,8 +269,45 @@ export function App() {
   }
 
   const handleAddCategory = (cat: string) => {
-    if (!categories.includes(cat)) {
-      setCategories((prev) => [...prev, cat])
+    const trimmed = cat.trim()
+    if (!trimmed) return
+    if (!categories.includes(trimmed)) {
+      setCategories((prev) => [...prev, trimmed])
+    }
+  }
+
+  const handleDeleteCategory = (catToDelete: string) => {
+    if (catToDelete === 'Semua') {
+      alert('Kategori "Semua" adalah kategori sistem dan tidak dapat dihapus.')
+      return
+    }
+
+    const affectedProducts = products.filter((p) => p.category === catToDelete)
+    const message =
+      affectedProducts.length > 0
+        ? `Kategori "${catToDelete}" digunakan oleh ${affectedProducts.length} produk.\nJika dihapus, kategori produk tersebut akan dialihkan ke "Lainnya".\n\nLanjutkan menghapus kategori ini?`
+        : `Yakin ingin menghapus kategori "${catToDelete}"?`
+
+    if (!confirm(message)) return
+
+    setCategories((prev) => {
+      const filtered = prev.filter((c) => c !== catToDelete)
+      if (affectedProducts.length > 0 && !filtered.includes('Lainnya')) {
+        return [...filtered, 'Lainnya']
+      }
+      return filtered
+    })
+
+    if (affectedProducts.length > 0) {
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.category === catToDelete ? { ...p, category: 'Lainnya' } : p
+        )
+      )
+    }
+
+    if (posCategory === catToDelete) {
+      setPosCategory('Semua')
     }
   }
 
@@ -398,6 +435,7 @@ export function App() {
             onSaveProduct={handleSaveProduct}
             onDeleteProduct={handleDeleteProduct}
             onAddCategory={handleAddCategory}
+            onDeleteCategory={handleDeleteCategory}
           />
         )}
 
@@ -412,6 +450,8 @@ export function App() {
             products={products}
             transactions={transactions}
             categories={categories}
+            onAddCategory={handleAddCategory}
+            onDeleteCategory={handleDeleteCategory}
             onRestoreData={handleRestoreData}
             onResetToDemo={handleResetToDemo}
           />
@@ -477,6 +517,7 @@ export function App() {
         isOpen={isPaymentOpen}
         onClose={() => setIsPaymentOpen(false)}
         totalAmount={grandTotal}
+        store={store}
         onComplete={handleCompletePayment}
       />
 

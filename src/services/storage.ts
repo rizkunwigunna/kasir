@@ -51,7 +51,17 @@ export const saveTransactions = (transactions: Transaction[]) => {
 export const getStoredStoreProfile = (): StoreProfile => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.STORE_PROFILE)
-    return data ? JSON.parse(data) : initialStoreProfile
+    if (!data) return initialStoreProfile
+    const parsed = JSON.parse(data)
+    return {
+      ...initialStoreProfile,
+      ...parsed,
+      bankAccounts: parsed.bankAccounts ?? initialStoreProfile.bankAccounts,
+      qris: {
+        ...initialStoreProfile.qris,
+        ...(parsed.qris || {}),
+      },
+    }
   } catch (err) {
     console.error('Failed reading store profile', err)
     return initialStoreProfile

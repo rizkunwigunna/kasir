@@ -8,6 +8,16 @@ export const initialStoreProfile: StoreProfile = {
   receiptFooter: 'Terima kasih atas kunjungan Anda!\nFollow IG: @kopirasa.nusantara',
   taxPercent: 0,
   currency: 'Rp',
+  bankAccounts: [
+    { id: 'bank-1', bankName: 'BCA', accountNumber: '1234567890', accountHolder: 'KASIR NUSANTARA' },
+    { id: 'bank-2', bankName: 'Mandiri', accountNumber: '1370009876543', accountHolder: 'KASIR NUSANTARA' },
+    { id: 'bank-3', bankName: 'BRI', accountNumber: '012301009876501', accountHolder: 'KASIR NUSANTARA' },
+  ],
+  qris: {
+    merchantName: 'KASIR NUSANTARA',
+    nmid: 'ID1029384756',
+    qrImageUrl: '',
+  },
 }
 
 export const initialCategories: string[] = [

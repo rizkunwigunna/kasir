@@ -10,6 +10,7 @@ import {
   Package,
   X,
   Check,
+  Tag,
 } from 'lucide-react'
 
 interface ProductManagerProps {
@@ -18,6 +19,7 @@ interface ProductManagerProps {
   onSaveProduct: (product: Product) => void
   onDeleteProduct: (productId: string) => void
   onAddCategory: (category: string) => void
+  onDeleteCategory: (category: string) => void
 }
 
 export const ProductManager: React.FC<ProductManagerProps> = ({
@@ -26,12 +28,15 @@ export const ProductManager: React.FC<ProductManagerProps> = ({
   onSaveProduct,
   onDeleteProduct,
   onAddCategory,
+  onDeleteCategory,
 }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [newCatInput, setNewCatInput] = useState('')
+  const [newCatModalInput, setNewCatModalInput] = useState('')
   const [showAddCat, setShowAddCat] = useState(false)
 
   // Form State
@@ -111,6 +116,26 @@ export const ProductManager: React.FC<ProductManagerProps> = ({
     }
   }
 
+  const handleModalCreateCategory = (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = newCatModalInput.trim()
+    if (trimmed) {
+      if (categories.includes(trimmed)) {
+        alert('Kategori tersebut sudah terdaftar!')
+        return
+      }
+      onAddCategory(trimmed)
+      setNewCatModalInput('')
+    }
+  }
+
+  const handleModalDeleteCategory = (cat: string) => {
+    onDeleteCategory(cat)
+    if (selectedCategory === cat) {
+      setSelectedCategory('Semua')
+    }
+  }
+
   return (
     <div className="space-y-4 pb-24">
       {/* Low Stock Warning */}
@@ -156,7 +181,15 @@ export const ProductManager: React.FC<ProductManagerProps> = ({
         </div>
 
         {/* Categories Pills */}
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pt-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+          <button
+            type="button"
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="py-1.5 px-2.5 rounded-xl text-xs font-semibold whitespace-nowrap bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 flex items-center gap-1 shrink-0 transition-all active:scale-95"
+          >
+            <Tag className="w-3.5 h-3.5" />
+            <span>Kelola Kategori</span>
+          </button>
           {categories.map((cat) => (
             <button
               key={cat}
@@ -464,6 +497,119 @@ export const ProductManager: React.FC<ProductManagerProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Category Management Modal */}
+      {isCategoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto max-h-[90vh]">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+                  <Tag className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800 m-0">Kelola Kategori Menu</h3>
+                  <p className="text-[11px] text-slate-500 m-0">Tambah atau hapus kategori produk</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCategoryModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center active:scale-95"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4 overflow-y-auto">
+              {/* Form Tambah Kategori */}
+              <form onSubmit={handleModalCreateCategory} className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 block">
+                  Tambah Kategori Baru
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Cth: Minuman Dingin, Snack..."
+                    value={newCatModalInput}
+                    onChange={(e) => setNewCatModalInput(e.target.value)}
+                    className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-semibold"
+                  />
+                  <button
+                    type="submit"
+                    className="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl flex items-center gap-1 active:scale-95 shadow-xs shrink-0"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Tambah</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* Daftar Kategori */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                  <span>Daftar Kategori ({categories.length})</span>
+                  <span className="text-[10px] text-slate-400">Total Produk</span>
+                </div>
+
+                <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+                  {categories.map((cat) => {
+                    const count =
+                      cat === 'Semua'
+                        ? products.length
+                        : products.filter((p) => p.category === cat).length
+                    const isSystem = cat === 'Semua'
+
+                    return (
+                      <div
+                        key={cat}
+                        className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-2"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-bold text-slate-800 truncate">
+                            {cat}
+                          </span>
+                          {isSystem && (
+                            <span className="text-[9px] bg-slate-200 text-slate-600 font-bold px-1.5 py-0.5 rounded">
+                              Sistem
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-semibold text-slate-500 bg-white px-2 py-0.5 rounded-lg border border-slate-200">
+                            {count} produk
+                          </span>
+                          {!isSystem && (
+                            <button
+                              type="button"
+                              onClick={() => handleModalDeleteCategory(cat)}
+                              title={`Hapus kategori ${cat}`}
+                              className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center active:scale-90 transition-all border border-red-200"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 border-t border-slate-100 bg-slate-50">
+              <button
+                type="button"
+                onClick={() => setIsCategoryModalOpen(false)}
+                className="w-full py-2 px-4 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl active:scale-95"
+              >
+                Selesai
+              </button>
+            </div>
           </div>
         </div>
       )}
