@@ -68,3 +68,14 @@ export interface StoreProfile {
 }
 
 export type ActiveTab = 'pos' | 'history' | 'inventory' | 'reports' | 'settings'
+
+export type UserRole = 'admin' | 'kasir'
+
+export interface User {
+  id: string
+  username: string
+  name: string
+  pin: string
+  role: UserRole
+  createdAt: string
+}

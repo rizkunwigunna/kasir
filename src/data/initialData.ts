@@ -1,4 +1,23 @@
-import type { Product, StoreProfile } from '../types'
+import type { Product, StoreProfile, User } from '../types'
+
+export const initialUsers: User[] = [
+  {
+    id: 'user-admin',
+    username: 'admin',
+    name: 'Owner / Admin',
+    pin: '123456',
+    role: 'admin',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'user-kasir',
+    username: 'kasir',
+    name: 'Kasir 1',
+    pin: '123456',
+    role: 'kasir',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+]
 
 export const initialStoreProfile: StoreProfile = {
   name: 'Kopi & Rasa Nusantara',

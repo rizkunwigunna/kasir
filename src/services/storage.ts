@@ -1,11 +1,18 @@
-import type { Product, StoreProfile, Transaction } from '../types'
-import { initialProducts, initialStoreProfile, initialCategories } from '../data/initialData'
+import type { Product, StoreProfile, Transaction, User } from '../types'
+import {
+  initialProducts,
+  initialStoreProfile,
+  initialCategories,
+  initialUsers,
+} from '../data/initialData'
 
 const STORAGE_KEYS = {
   PRODUCTS: 'pos_products_v1',
   TRANSACTIONS: 'pos_transactions_v1',
   STORE_PROFILE: 'pos_store_profile_v1',
   CATEGORIES: 'pos_categories_v1',
+  USERS: 'pos_users_v1',
+  CURRENT_USER: 'pos_current_user_v1',
 }
 
 export const getStoredProducts = (): Product[] => {
@@ -91,6 +98,51 @@ export const saveCategories = (categories: string[]) => {
     localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories))
   } catch (err) {
     console.error('Failed saving categories', err)
+  }
+}
+
+export const getStoredUsers = (): User[] => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.USERS)
+    if (!data) {
+      saveUsers(initialUsers)
+      return initialUsers
+    }
+    const parsed = JSON.parse(data)
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : initialUsers
+  } catch (err) {
+    console.error('Failed reading users from localStorage', err)
+    return initialUsers
+  }
+}
+
+export const saveUsers = (users: User[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users))
+  } catch (err) {
+    console.error('Failed saving users to localStorage', err)
+  }
+}
+
+export const getStoredCurrentUser = (): User | null => {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.CURRENT_USER)
+    return data ? JSON.parse(data) : null
+  } catch (err) {
+    console.error('Failed reading current user', err)
+    return null
+  }
+}
+
+export const saveCurrentUser = (user: User | null) => {
+  try {
+    if (user) {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user))
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER)
+    }
+  } catch (err) {
+    console.error('Failed saving current user', err)
   }
 }
 

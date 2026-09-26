@@ -6,6 +6,7 @@ import type {
   StoreProfile,
   ActiveTab,
   PaymentMethod,
+  User,
 } from './types'
 import {
   getStoredProducts,
@@ -16,6 +17,10 @@ import {
   saveStoreProfile,
   getStoredCategories,
   saveCategories,
+  getStoredUsers,
+  saveUsers,
+  getStoredCurrentUser,
+  saveCurrentUser,
   formatRupiah,
   generateInvoiceNumber,
 } from './services/storage'
@@ -23,6 +28,7 @@ import {
   initialProducts,
   initialStoreProfile,
   initialCategories,
+  initialUsers,
 } from './data/initialData'
 
 import { Navbar } from './components/Navbar'
@@ -36,6 +42,7 @@ import { HistoryView } from './components/HistoryView'
 import { ProductManager } from './components/ProductManager'
 import { AnalyticsView } from './components/AnalyticsView'
 import { SettingsView } from './components/SettingsView'
+import { LoginView } from './components/LoginView'
 
 import { Search, ShoppingBag, ArrowRight } from 'lucide-react'
 
@@ -45,6 +52,8 @@ export function App() {
   const [transactions, setTransactions] = useState<Transaction[]>(getStoredTransactions)
   const [store, setStore] = useState<StoreProfile>(getStoredStoreProfile)
   const [categories, setCategories] = useState<string[]>(getStoredCategories)
+  const [users, setUsers] = useState<User[]>(getStoredUsers)
+  const [currentUser, setCurrentUser] = useState<User | null>(getStoredCurrentUser)
   const [activeTab, setActiveTab] = useState<ActiveTab>('pos')
 
   // Cart & Order State
@@ -80,6 +89,21 @@ export function App() {
   useEffect(() => {
     saveCategories(categories)
   }, [categories])
+
+  useEffect(() => {
+    saveUsers(users)
+  }, [users])
+
+  useEffect(() => {
+    saveCurrentUser(currentUser)
+  }, [currentUser])
+
+  // Kasir role restriction: strictly stay on 'pos' tab
+  useEffect(() => {
+    if (currentUser?.role === 'kasir' && activeTab !== 'pos') {
+      setActiveTab('pos')
+    }
+  }, [currentUser, activeTab])
 
   // Total cart calculation
   const totalCartCount = useMemo(() => {
@@ -317,11 +341,15 @@ export function App() {
     transactions: Transaction[]
     store: StoreProfile
     categories: string[]
+    users?: User[]
   }) => {
     setProducts(data.products)
     setTransactions(data.transactions)
     setStore(data.store)
     setCategories(data.categories)
+    if (data.users && data.users.length > 0) {
+      setUsers(data.users)
+    }
     setCart([])
   }
 
@@ -330,11 +358,13 @@ export function App() {
     setTransactions([])
     setStore(initialStoreProfile)
     setCategories(initialCategories)
+    setUsers(initialUsers)
     setCart([])
     saveProducts(initialProducts)
     saveTransactions([])
     saveStoreProfile(initialStoreProfile)
     saveCategories(initialCategories)
+    saveUsers(initialUsers)
   }
 
   // POS filtered products
@@ -349,6 +379,22 @@ export function App() {
     })
   }, [products, posSearch, posCategory])
 
+  // If not logged in, show Login Screen
+  if (!currentUser) {
+    return (
+      <LoginView
+        store={store}
+        users={users}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user)
+          setActiveTab('pos')
+        }}
+      />
+    )
+  }
+
+  const isAdmin = currentUser.role === 'admin'
+
   return (
     <div className="min-h-screen bg-slate-100/70 text-slate-900 flex flex-col antialiased selection:bg-emerald-500 selection:text-white">
       {/* Top Header Navbar */}
@@ -356,6 +402,8 @@ export function App() {
         store={store}
         activeTab={activeTab}
         cartItemCount={totalCartCount}
+        currentUser={currentUser}
+        onLogout={() => setCurrentUser(null)}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenScanner={() => setIsScannerOpen(true)}
       />
@@ -415,7 +463,7 @@ export function App() {
           </div>
         )}
 
-        {activeTab === 'history' && (
+        {isAdmin && activeTab === 'history' && (
           <HistoryView
             transactions={transactions}
             store={store}
@@ -428,7 +476,7 @@ export function App() {
           />
         )}
 
-        {activeTab === 'inventory' && (
+        {isAdmin && activeTab === 'inventory' && (
           <ProductManager
             products={products}
             categories={categories}
@@ -439,17 +487,20 @@ export function App() {
           />
         )}
 
-        {activeTab === 'reports' && (
+        {isAdmin && activeTab === 'reports' && (
           <AnalyticsView transactions={transactions} products={products} />
         )}
 
-        {activeTab === 'settings' && (
+        {isAdmin && activeTab === 'settings' && (
           <SettingsView
             store={store}
             onSaveStore={setStore}
             products={products}
             transactions={transactions}
             categories={categories}
+            users={users}
+            currentUser={currentUser}
+            onSaveUsers={setUsers}
             onAddCategory={handleAddCategory}
             onDeleteCategory={handleDeleteCategory}
             onRestoreData={handleRestoreData}
@@ -460,7 +511,7 @@ export function App() {
 
       {/* Floating Bottom Checkout Bar for Mobile (Only in POS tab when cart has items) */}
       {activeTab === 'pos' && cart.length > 0 && (
-        <div className="fixed bottom-18 left-3 right-3 z-30 max-w-md mx-auto animate-in slide-in-from-bottom duration-300">
+        <div className={`fixed ${isAdmin ? 'bottom-18' : 'bottom-4'} left-3 right-3 z-30 max-w-md mx-auto animate-in slide-in-from-bottom duration-300`}>
           <button
             onClick={() => setIsCartOpen(true)}
             className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.99] text-white p-3 rounded-2xl shadow-xl shadow-emerald-700/30 flex items-center justify-between transition-all border border-emerald-500/40"
@@ -486,12 +537,14 @@ export function App() {
         </div>
       )}
 
-      {/* Bottom Ergonomic Navigation Bar */}
-      <BottomNav
-        activeTab={activeTab}
-        onChangeTab={setActiveTab}
-        cartCount={totalCartCount}
-      />
+      {/* Bottom Ergonomic Navigation Bar - Only visible for Admin */}
+      {isAdmin && (
+        <BottomNav
+          activeTab={activeTab}
+          onChangeTab={setActiveTab}
+          cartCount={totalCartCount}
+        />
+      )}
 
       {/* Cart Drawer */}
       <CartDrawer
