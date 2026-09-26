@@ -43,6 +43,7 @@ import { ProductManager } from './components/ProductManager'
 import { AnalyticsView } from './components/AnalyticsView'
 import { SettingsView } from './components/SettingsView'
 import { LoginView } from './components/LoginView'
+import { ProfileModal } from './components/ProfileModal'
 
 import { Search, ShoppingBag, ArrowRight } from 'lucide-react'
 
@@ -67,6 +68,7 @@ export function App() {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isReceiptOpen, setIsReceiptOpen] = useState(false)
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false)
   const [currentTransaction, setCurrentTransaction] = useState<Transaction | null>(null)
 
   // Search & Filter for POS
@@ -367,6 +369,14 @@ export function App() {
     saveUsers(initialUsers)
   }
 
+  // Update Current User Self Profile (Cashier or Admin changing their own username/PIN)
+  const handleUpdateSelfProfile = (updatedUser: User) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+    )
+    setCurrentUser(updatedUser)
+  }
+
   // POS filtered products
   const posFilteredProducts = useMemo(() => {
     return products.filter((p) => {
@@ -404,6 +414,7 @@ export function App() {
         cartItemCount={totalCartCount}
         currentUser={currentUser}
         onLogout={() => setCurrentUser(null)}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenScanner={() => setIsScannerOpen(true)}
       />
@@ -591,6 +602,15 @@ export function App() {
         isOpen={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}
         onScanSuccess={handleScanSuccess}
+      />
+
+      {/* User Self Profile Modal (Cashier changing username & PIN) */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        currentUser={currentUser}
+        allUsers={users}
+        onUpdateProfile={handleUpdateSelfProfile}
       />
     </div>
   )

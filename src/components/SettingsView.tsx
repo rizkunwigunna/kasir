@@ -26,6 +26,7 @@ import {
   Users,
   ShieldCheck,
   UserCheck,
+  KeyRound,
 } from 'lucide-react'
 
 interface SettingsViewProps {
@@ -423,6 +424,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </button>
         </div>
 
+        {/* Real-time credential monitor info for Admin */}
+        <div className="p-2.5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-[11px] text-emerald-800 flex items-start gap-2">
+          <KeyRound className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
+            <b>Pantauan Kredensial Kasir:</b> Kasir dapat mengganti nama, username, dan PIN mereka sendiri lewat tombol profil di navbar atas. Setiap kali kasir mengubah akunnya, username dan PIN baru <b>otomatis terupdate dan langsung terlihat oleh Anda di daftar ini</b>.
+          </div>
+        </div>
+
         {/* User List */}
         <div className="space-y-2">
           {users.map((u) => {
@@ -465,10 +474,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         {isKasir ? 'Hanya Kasir' : 'Full Admin'}
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1.5 mt-0.5">
-                      <span>User: <b>{u.username}</b></span>
-                      <span>&bull;</span>
-                      <span>PIN: <b>{u.pin}</b></span>
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <div className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[11px] font-mono text-slate-700 flex items-center gap-1">
+                        <span className="text-[10px] text-slate-400">Username:</span>
+                        <b className="text-slate-900 font-bold">{u.username}</b>
+                      </div>
+                      <div className="px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] font-mono text-amber-900 flex items-center gap-1">
+                        <KeyRound className="w-3 h-3 text-amber-600" />
+                        <span className="text-[10px] text-amber-700">PIN Aktif:</span>
+                        <b className="text-amber-950 font-bold tracking-wider">{u.pin}</b>
+                      </div>
                     </div>
                   </div>
                 </div>

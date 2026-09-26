@@ -8,6 +8,7 @@ interface NavbarProps {
   cartItemCount: number
   currentUser: User | null
   onLogout: () => void
+  onOpenProfile: () => void
   onOpenCart: () => void
   onOpenScanner: () => void
 }
@@ -18,6 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   cartItemCount,
   currentUser,
   onLogout,
+  onOpenProfile,
   onOpenCart,
   onOpenScanner,
 }) => {
@@ -42,23 +44,28 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Quick Actions (User, Scan Barcode, Cart Drawer, Logout) */}
         <div className="flex items-center space-x-1.5 sm:space-x-2">
           {currentUser && (
-            <div className="hidden xs:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 text-xs">
+            <button
+              type="button"
+              onClick={onOpenProfile}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-xs transition-all text-left"
+              title="Klik untuk ubah Nama, Username & PIN login Anda"
+            >
               {currentUser.role === 'admin' ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
               ) : (
-                <UserCheck className="w-3.5 h-3.5 text-sky-300 shrink-0" />
+                <UserCheck className="w-4 h-4 text-sky-300 shrink-0" />
               )}
-              <div className="flex flex-col text-left leading-none">
+              <div className="hidden xs:flex flex-col text-left leading-none">
                 <span className="font-bold text-white text-[11px] truncate max-w-20 sm:max-w-28">
                   {currentUser.name}
                 </span>
-                <span className={`text-[9px] font-bold uppercase ${
+                <span className={`text-[9px] font-bold uppercase mt-0.5 ${
                   currentUser.role === 'admin' ? 'text-amber-300' : 'text-sky-300'
                 }`}>
-                  {currentUser.role === 'admin' ? 'Admin' : 'Kasir'}
+                  {currentUser.role === 'admin' ? 'Admin' : 'Kasir (Ubah PIN)'}
                 </span>
               </div>
-            </div>
+            </button>
           )}
 
           {activeTab === 'pos' && (
